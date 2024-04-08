@@ -1,0 +1,13 @@
+:root {
+  font-family: "Barlow Semi Condensed", sans-serif;
+  background-color: radial-gradient(
+    134% 134% at 50% 0%,
+    rgb(31, 55, 87),
+    rgb(19, 21, 55) 100%
+  );
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+
