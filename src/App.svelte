@@ -6,7 +6,11 @@
 	import Footer from './components/Footer.svelte';
     import Rules from './components/Rules.svelte';
 	import Header from './components/Header.svelte';
-	
+	import store from "../store"
+	import { writable } from 'svelte/store';
+
+    console.log("store",store)
+
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     let isMobile = !mediaQuery.matches; 
     function mediaQueryHandler(event: MediaQueryListEvent) {
@@ -65,6 +69,7 @@
 <main class="app-desktop " >
     <span class="background {showRules ? 'blurred' : ''}">
         <Header/>
+       
         <div class="desktop-content ">
         {#if step === 1}
         <FirstStep on:setpage={handleSetPage}/>
