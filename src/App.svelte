@@ -1,12 +1,51 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import FirstStep from "./components/firstStep.svelte";
     import SecondStep from "./components/secondStep.svelte";
     import ThirdStep from "./components/thirdStep.svelte";
-	import Footer from './components/Footer.svelte';
+    import Menu from './components/Menu.svelte';
+    import Footer from './components/Footer.svelte';
     import Rules from './components/Rules.svelte';
-	import Header from './components/Header.svelte';
-	
+    import Header from './components/Header.svelte';
+    import StompJs from 'stompjs';
+
+    let stompClient;
+
+    onMount(() => {
+        // Инициализация Stomp клиента при загрузке компонента
+        stompClient = new StompJs.Client({
+            brokerURL: 'ws://localhost:8080/gs-guide-websocket'
+        });
+
+        // Обработчик успешного подключения
+        stompClient.onConnect = (frame) => {
+            console.log('Connected: ' + frame);
+            // Здесь вы можете выполнить дополнительные действия после подключения
+        };
+
+        // Обработчик ошибок WebSocket
+        stompClient.onWebSocketError = (error) => {
+            console.error('Error with websocket', error);
+        };
+
+        // Обработчик ошибок от брокера
+        stompClient.onStompError = (frame) => {
+            console.error('Broker reported error: ' + frame.headers['message']);
+            console.error('Additional details: ' + frame.body);
+        };
+
+        // Активация Stomp клиента
+        stompClient.activate();
+    });
+
+    // Отключение клиента при уничтожении компонента
+    onDestroy(() => {
+        if (stompClient) {
+            stompClient.deactivate();
+            console.log("Disconnected");
+        }
+    });
+    
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     let isMobile = !mediaQuery.matches; 
     function mediaQueryHandler(event: MediaQueryListEvent) {
@@ -20,6 +59,7 @@
     let showRules = false;
     let step: number = 1;
     let selectedItem: string;
+    let username: string = ""; // Переменная для хранения имени пользователя
 
     function handleSetPage(event: CustomEvent) {
         const data = event.detail;
@@ -35,47 +75,57 @@
         step = event.detail.page;
         showRules = false;
     }
+
+    // Функция для перехода с Menu на FirstStep после сохранения имени
+    function handleUsernameSaved() {
+        step = 2; // Устанавливаем шаг на FirstStep
+    }
+
+    // Обработчик для события playersReady, запускаемого из компонента Menu.svelte
+    function handlePlayersReady() {
+        step = 2; // Устанавливаем шаг на SecondStep после того, как два игрока подключились
+    }
 </script>
 
 {#if isMobile}
-
-<main class="app">
-
-    {#if !showRules} 
-    <Header/>
-
-        {#if step === 1}
-            <FirstStep on:setpage={handleSetPage}/>
-        {:else if step === 2}
-            <SecondStep selectedItem={selectedItem} />
-        {:else if step === 3}
-            <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} />
-        {/if}
-        <Footer on:openRules={handleRulesOpen}/>
+    <main class="app">
+        {#if !showRules} 
+            <!-- Изменяем условия отображения для каждого шага -->
+            {#if step === 1}
+                <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
+                <Menu on:usernameSaved={handleUsernameSaved}/> 
+            {:else if step === 2}
+            <Header/>
+                <FirstStep on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
+            {:else if step === 3}
+                <SecondStep selectedItem={selectedItem} /> <!-- Перемещаем SecondStep на третье место -->
+            {:else if step === 4}
+                <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} /> <!-- Перемещаем ThirdStep на четвертое место -->
+            {/if}
+            <Footer on:openRules={handleRulesOpen}/>
         {/if} 
-        {#if showRules}
-        <div class="rules-page">
-            <Rules step={step} on:setpage={handleRulesClosed} on:closeRules={handleRulesClosed} />
-        </div> 
-    {/if}
-   
-</main>
 
+        {#if showRules}
+            <div class="rules-page">
+                <Rules step={step} on:setpage={handleRulesClosed} on:closeRules={handleRulesClosed} />
+            </div> 
+        {/if}
+    </main>
 {:else}
-<main class="app-desktop " >
-    <span class="background {showRules ? 'blurred' : ''}">
-        <Header/>
-        <div class="desktop-content ">
+<main class="app-desktop">
+    <div class="desktop-content">
         {#if step === 1}
-        <FirstStep on:setpage={handleSetPage}/>
+            <Menu on:usernameSaved={handleUsernameSaved}/> <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
         {:else if step === 2}
-            <SecondStep selectedItem={selectedItem} />
+        <Header/>
+            <FirstStep on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
         {:else if step === 3}
-            <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} />
+            <SecondStep selectedItem={selectedItem} /> <!-- Перемещаем SecondStep на третье место -->
+        {:else if step === 4}
+            <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} /> <!-- Перемещаем ThirdStep на четвертое место -->
         {/if}
         <Footer on:openRules={handleRulesOpen}/>
     </div>
-    </span>
     {#if showRules}
         <div class="rules-page">
             <Rules step={step} on:setpage={handleRulesClosed} on:closeRules={handleRulesClosed} />
