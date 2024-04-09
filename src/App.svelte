@@ -7,44 +7,7 @@
     import Footer from './components/Footer.svelte';
     import Rules from './components/Rules.svelte';
     import Header from './components/Header.svelte';
-    import StompJs from 'stompjs';
-
-    let stompClient;
-
-    onMount(() => {
-        // Инициализация Stomp клиента при загрузке компонента
-        stompClient = new StompJs.Client({
-            brokerURL: 'ws://localhost:8080/gs-guide-websocket'
-        });
-
-        // Обработчик успешного подключения
-        stompClient.onConnect = (frame) => {
-            console.log('Connected: ' + frame);
-            // Здесь вы можете выполнить дополнительные действия после подключения
-        };
-
-        // Обработчик ошибок WebSocket
-        stompClient.onWebSocketError = (error) => {
-            console.error('Error with websocket', error);
-        };
-
-        // Обработчик ошибок от брокера
-        stompClient.onStompError = (frame) => {
-            console.error('Broker reported error: ' + frame.headers['message']);
-            console.error('Additional details: ' + frame.body);
-        };
-
-        // Активация Stomp клиента
-        stompClient.activate();
-    });
-
-    // Отключение клиента при уничтожении компонента
-    onDestroy(() => {
-        if (stompClient) {
-            stompClient.deactivate();
-            console.log("Disconnected");
-        }
-    });
+    import WebSocket from "./routes/index.svelte"
     
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     let isMobile = !mediaQuery.matches; 
@@ -87,13 +50,15 @@
     }
 </script>
 
+<WebSocket/>
+
 {#if isMobile}
     <main class="app">
         {#if !showRules} 
             <!-- Изменяем условия отображения для каждого шага -->
             {#if step === 1}
                 <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
-                <Menu on:usernameSaved={handleUsernameSaved}/> 
+                <Menu on:playersReady={handlePlayersReady}/>  
             {:else if step === 2}
             <Header/>
                 <FirstStep on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
