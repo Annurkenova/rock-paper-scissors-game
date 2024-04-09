@@ -3,7 +3,7 @@
   const dispatch = createEventDispatcher();
 
   function selectMove(move: string) {
-    dispatch("setpage", { page: 2, move });
+    dispatch("setpage", { page: 3, move });
   }
 </script>
 
