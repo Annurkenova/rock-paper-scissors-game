@@ -23,7 +23,7 @@
    }
 
    // Функция для обработки нажатия на кнопку PLAY ONLINE
-   function handlePlayOnline() {
+   function handlePlayersReady() {
        // Увеличиваем счетчик игроков только если количество игроков меньше 2
        if (playersCount < 2) {
            playersCount++;
@@ -43,7 +43,6 @@
    }
 </script>
 
-
 <section class="menu">
    <label class="menu-container">
        <!-- Используем input для ввода имени пользователя -->
@@ -54,7 +53,7 @@
        <div class="playOnline">
            <!-- Заменим просто текст кнопки на кнопку -->
            <img src="./public/images/icon-online.png" alt="Online"/>
-           <button on:click={handlePlayOnline} class="play-online-button">PLAY ONLINE</button>
+           <button on:click={handlePlayersReady} class="play-online-button">PLAY ONLINE</button>
            <!-- Отображаем количество ожидающих игроков -->
            <span class="waiting-number">{playersCount} waiting </span>
        </div>
