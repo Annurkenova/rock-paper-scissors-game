@@ -4,12 +4,12 @@
     const dispatch = createEventDispatcher();
    
     function selectMove(move:string) {
-    dispatch('setpage', { page: 3, move }); 
+    dispatch('setpage', { page: 4, move }); 
     }
 </script>
 
 <div class="contest">
-    <p>{selectedItem} </p>
+
         <div class="userhand">
             <h3>YOU PICKED</h3>
             <div class="handImageContainer">
@@ -31,7 +31,7 @@
 
 <style>
     .contest {
-
+        width: 900px;
         display: flex;
         margin-top: 50px;
     }
@@ -57,13 +57,38 @@
     color: white;
 }
 
-.newGame {
-    color: white;
-}
-
 .contest .handImageContainer {
     display:flex;
     justify-content: center;
+}
+
+.referee {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.referee h2 {
+    font-size: 45px;
+}
+
+.newGame {
+    background-color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgb(59, 66, 98);
+    cursor: pointer;
+    transition:all 0.15s;
+}
+
+.newGame:hover {
+    color: rgb(219, 46, 77);
+    font-family: Barlow Semi Condensed;
+    font-size: 16px;
+    font-weight: 600;
 }
    </style>
    
