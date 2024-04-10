@@ -1,37 +1,56 @@
-<script lang="ts">
+<script>
+  import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
+  import { Stomp, Client } from '@stomp/stompjs';
+  import SockJS from 'sockjs-client';
+  let messages = [];    
+  export let selectedItem;
+  let messageList;
+  let stompClient = null;
+  export let username;
+  let connectingElement;
+  let playerElement;
 
-import { onMount } from 'svelte';
-import { writable } from 'svelte/store';
+  // Store to keep track of connection status
+  const isConnected = writable(false);
 
-const socket: WebSocket = new WebSocket("ws://localhost:8080");
-let messages: string[] = [];
-console.log('change')
+  function connect(event) {
+    if (username) {
+      const socket = new SockJS("http://localhost:8080/ws");
+      stompClient = Stomp.over(socket);
 
-socket.onopen = function (event) {
-  console.log("open", event);
-};
+      // Set up event listeners for connection status
+      stompClient.onConnect = () => {
+        isConnected.set(true);
+        onConnected();
+      };
+      stompClient.onDisconnect = () => {
+        isConnected.set(false);
+        onError(new Error('Disconnected'));
+      };
 
-socket.onerror = function (event) {
-  console.error('Error:', event);
-};
+      stompClient.activate(); // Connect to the server
+    }
 
-socket.onmessage = function (event) {
-  console.log('', event.data);
-  messages = [...messages, event.data]
-};
+    if (event) event.preventDefault();
+  }
 
-//onMount(() => {
-    //const unsubscribe = messages.subscribe(value => {
-      //messageList = value;
-    //});
+  function onConnected() {
+    if (stompClient) {
+      stompClient.subscribe('/topic/public', onMessageReceived);
+      stompClient.subscribe('/user/queue/msg', onMessageReceived);
+      stompClient.send("/app/play.addUser", {}, JSON.stringify({ sender: username, type: 'JOIN' }));
+      connectingElement.classList.add('hidden');
+      playerElement.innerText = 'Player: ' + username;
+      playerElement.classList.remove('hidden');
+    }
+  }
 
-    //return unsubscribe;
-  //});
+  function onError(error) {
+    connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
+    connectingElement.style.color = 'red';
+  }
 
-//socket.close();
+  // Modify your other functions accordingly
+
 </script>
-<ul>
-  {#each messages as message}
-    <li>{message}</li>
-  {/each}
-</ul>

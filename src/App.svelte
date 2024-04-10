@@ -7,8 +7,6 @@
     import Footer from './components/Footer.svelte';
     import Rules from './components/Rules.svelte';
 	import Header from './components/Header.svelte';
-	import store from "../store"
-	import { writable } from 'svelte/store';
     import WebSocket from "./routes/index.svelte"
     
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
@@ -23,15 +21,24 @@
 
     let showRules = false;
     let step: number = 1;
-    let selectedItem: string;
-    let username: string = ""; // Переменная для хранения имени пользователя
-
+    let selectedItem:string;
+    let username: string;
+    let score: number = 0;
+    let computerItem: string|null;
+    function handleUpdateScore(event: CustomEvent) {
+        const change = event.detail.change;
+        score += change; // Update the score based on the change
+    }
     function handleSetPage(event: CustomEvent) {
         const data = event.detail;
         step = data.page; 
-        selectedItem = data.move; 
+        selectedItem = data.selectedItem; 
+   
     } 
-
+function handlePlayAgain(event:CustomEvent){
+    const data = event.detail;
+    computerItem = data.computerItem;
+}
     function handleRulesOpen() {
         showRules = true;
     }
@@ -52,22 +59,22 @@
     }
 </script>
 
-<WebSocket/>
+<WebSocket selectedItem={selectedItem} username={username}/>
 
 {#if isMobile}
     <main class="app">
         {#if !showRules} 
-            <!-- Изменяем условия отображения для каждого шага -->
+        <Header score={score}/>
             {#if step === 1}
-                <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
-                <Menu on:playersReady={handlePlayersReady}/>  
+                <Menu on:playersReady={handlePlayersReady} username={username}/>  
             {:else if step === 2}
-            <Header/>
-                <FirstStep on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
-            {:else if step === 3}
-                <SecondStep selectedItem={selectedItem} /> <!-- Перемещаем SecondStep на третье место -->
+                <FirstStep on:setpage={handleSetPage} bind:selectedItem={selectedItem}  on:playersReady={handlePlayersReady}/> 
+                {:else if step === 3}
+                <SecondStep selectedItem={selectedItem} bind:computerItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
             {:else if step === 4}
-                <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} /> <!-- Перемещаем ThirdStep на четвертое место -->
+                <ThirdStep  bind:computerItem={computerItem} selectedItem={selectedItem} 
+                on:playagain={handlePlayAgain}
+                on:setpage={handleSetPage} on:updateScore={handleUpdateScore}/> <!-- Перемещаем ThirdStep на четвертое место -->
             {/if}
             <Footer on:openRules={handleRulesOpen}/>
         {/if} 
@@ -80,19 +87,18 @@
     </main>
 {:else}
 <main class="app-desktop " >
-    <span class="background {showRules ? 'blurred' : ''}">
-        <Header/>
-       
+    <span class="background {showRules ? 'blurred' : 'not-blurred'}">
+        <Header score={score}/>
         <div class="desktop-content ">
+     
         {#if step === 1}
-            <Menu on:usernameSaved={handleUsernameSaved}/> <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
+            <Menu on:usernameSaved={handleUsernameSaved} on:playersReady={handlePlayersReady}/> <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
         {:else if step === 2}
-        <Header/>
-            <FirstStep on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
+            <FirstStep bind:selectedItem={selectedItem} on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
         {:else if step === 3}
-            <SecondStep selectedItem={selectedItem} /> <!-- Перемещаем SecondStep на третье место -->
+            <SecondStep bind:selectedItem={selectedItem} bind:computerItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
         {:else if step === 4}
-            <ThirdStep selectedItem={selectedItem} on:setpage={(data) => step = data.detail.page} /> <!-- Перемещаем ThirdStep на четвертое место -->
+            <ThirdStep     on:playagain={handlePlayAgain} computerItem={computerItem} selectedItem={selectedItem} on:setpage={handleSetPage} on:updateScore={handleUpdateScore} /> <!-- Перемещаем ThirdStep на четвертое место -->
         {/if}
         <Footer on:openRules={handleRulesOpen}/>
     </div>
@@ -110,15 +116,16 @@
 .app {
     padding: 2rem;
     background: radial-gradient(134.00% 134.00% at 50% 0%, rgb(31, 55, 87), rgb(19, 21, 55) 100%);
-    height: 100vh;
+    height: 100%;
  }
-
 
  .desktop-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
  }
+
 
  @media only screen and (min-width: 1024px) {
 
@@ -133,15 +140,19 @@
         z-index: 100; 
         overflow-y: auto;
         display: flex;
+       
     }
         .app-desktop {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             padding:3rem 8rem;
             background: radial-gradient(134.00% 134.00% at 50% 0%, rgb(31, 55, 87), rgb(19, 21, 55) 100%);
             height: 200vh;
-
         }
-        .blurred:not(.rules-page) {
-            filter: brightness(80%);
-    }
+        /* .blurred:not(.rules-page) {
+            filter: brightness(80%) !important; 
+    } */
+    
  }
 </style>
