@@ -14,5 +14,8 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+     <script>
+      var global = window; // fix global is undefined in socketjs-client
+  </script>
   </body>
 </html>

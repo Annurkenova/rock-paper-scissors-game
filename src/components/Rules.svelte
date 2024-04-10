@@ -73,7 +73,6 @@
             padding-bottom: 1rem;
            padding-left: 2rem;
             justify-content:center;
-            align-content: center;
         }
      
         .rules-title {

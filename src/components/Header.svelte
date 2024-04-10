@@ -1,4 +1,7 @@
 <script lang="ts">
+     export let score:number;
+
+
 </script>
 
 <header class="header-container">
@@ -9,7 +12,7 @@
         </section>
         <div class ="header-container-score">
             <p class ="score-text">SCORE</p>
-            <p class ="score-number">0</p>
+            <p class ="score-number">{score}</p>
         </div>
 
 </header>

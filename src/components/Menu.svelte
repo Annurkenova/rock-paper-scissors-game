@@ -1,7 +1,7 @@
 <script lang="ts">
    import { createEventDispatcher } from 'svelte';
   
-   let username = ""; // Переменная для хранения имени пользователя
+   export let username = ""; // Переменная для хранения имени пользователя
    let playersCount = 0; // Переменная для хранения количества игроков
    const dispatch = createEventDispatcher();
 
@@ -9,8 +9,9 @@
    function handleUsernameInput(event: Event) {
        const inputEvent = event as InputEvent;
        username = (inputEvent.target as HTMLInputElement).value;
+       dispatch("username")
    }
-
+  
    // Функция для сохранения имени пользователя
    function saveUsername() {
        // Проверяем, было ли уже сохранено имя
@@ -25,15 +26,15 @@
    // Функция для обработки нажатия на кнопку PLAY ONLINE
    function handlePlayersReady() {
        // Увеличиваем счетчик игроков только если количество игроков меньше 2
-       if (playersCount < 2) {
-           playersCount++;
-       }
+    //    if (playersCount < 2) {
+    //        playersCount++;
+    //    }
 
-       // Проверяем, достигло ли количество игроков 2
-       if (playersCount === 2) {
+    //    // Проверяем, достигло ли количество игроков 2
+    //    if (playersCount === 2) {
            // Отправляем событие playersReady только если количество игроков равно 2
            dispatch('playersReady');
-       }
+       
    }
 
    // Функция для обработки нажатия на кнопку PLAY COMPUTER
