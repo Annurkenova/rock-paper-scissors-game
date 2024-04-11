@@ -1,7 +1,6 @@
 <script lang="ts">
      export let score:number;
 
-
 </script>
 
 <header class="header-container">

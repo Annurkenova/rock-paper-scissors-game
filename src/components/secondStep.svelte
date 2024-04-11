@@ -1,31 +1,57 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy } from "svelte";
     import { onMount } from "svelte";
+    import io, { Socket } from 'socket.io-client';
 
-    export let selectedItem:  string;
+    interface Player {
+        name: string;
+        picked: string;
+        socketId:number|string;
+    }
+
     const dispatch = createEventDispatcher();
-    export let computerItem: string | null = null;
-    let gameResult: string | null = null;
+ export let selectedItem: string;
+    export let rivalSelectedItem: string | null = null;
 
-    // Simulating delay to demonstrate loading
+    let socket: Socket;
+
     onMount(() => {
-    
-        setTimeout(()=>{
-            dispatch("setpage", { page: 4,selectedItem});
-        },5000)
-        // Assume the server sends the image URL through WebSocket after a delay
-        setTimeout(() => {
-            // Randomly select an item for the computer's hand
-            const items = ['rock', 'paper', 'scissors'];
-            const randomIndex = Math.floor(Math.random() * items.length);
-            computerItem = items[randomIndex];
-        }, 3000); // Adjust the delay as needed
-       
-    });
-   
- 
-</script>
+        socket = io('http://localhost:3030');
+        socket.on('result', (result): void => {
+            if (result && result.playerOne && result.playerTwo) {
+                // Determine the user's player based on the socket.id
+                const userPlayer: Player = result.playerOne.socketId === socket.id ? result.playerOne : result.playerTwo;
 
+                // Check if selectedItem is already set
+                if (!selectedItem) {
+                    selectedItem = userPlayer.picked;
+                }
+                
+                // Update the rival's selection based on the received result
+                if (userPlayer.socketId !== socket.id) {
+                    rivalSelectedItem = userPlayer.picked;
+                }
+                
+                dispatch("setpage", { page: 4, selectedItem, rivalSelectedItem });
+            } else {
+                console.error('Invalid result format:', result);
+            }
+        });
+    
+        return () => {
+            if (socket) {
+                socket.disconnect();
+            }
+        };
+
+        onDestroy(() => {
+            if (socket) {
+                socket.disconnect();
+            }
+        });
+    });
+
+</script>
 <div class="contest">
     <div class="userhand">
         <h3>YOU PICKED</h3>
@@ -41,19 +67,26 @@
         </div>
     </div>
     <div class="rivalhand">
-        <h3>THE HOUSE PICKED</h3>
+        <h3>THE RIVAL PICKED</h3>
         <div class="handImageContainer">
-            <!-- Display a loading indicator until the server item is received -->
-            {#if computerItem === null}
-                <div>Loading...</div>
+            <!-- Display the rival's selection -->
+            {#if rivalSelectedItem !== null}
+                {#if rivalSelectedItem === 'paper'}
+                    <img src="./public/images/Paper.png" alt="Paper"/>
+                {:else if rivalSelectedItem === 'scissors'}
+                    <img src="./public/images/Scissors.png" alt="Scissors"/>
+                {:else if rivalSelectedItem === 'rock'}
+                    <img src="./public/images/Rock.png" alt="Rock"/>
+                {/if}
             {:else}
-                <!-- Display the server item when it is received -->
-                <img src="{`./public/images/${computerItem.charAt(0).toUpperCase()}${computerItem.slice(1)}.png`}" alt="House's Pick"/>
+                <div>Loading...</div>
             {/if}
         </div>
     </div>
-    
 </div>
+
+
+
 <style>
 
 .userhand{

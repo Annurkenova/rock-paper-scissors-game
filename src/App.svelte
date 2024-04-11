@@ -49,8 +49,10 @@ function handlePlayAgain(event:CustomEvent){
     }
 
     // Функция для перехода с Menu на FirstStep после сохранения имени
-    function handleUsernameSaved() {
-        step = 2; // Устанавливаем шаг на FirstStep
+    function handleUsernameSaved(event:CustomEvent) {
+        const data = event.detail;
+        step = 2;
+        username = username; // Устанавливаем шаг на FirstStep
     }
 
     // Обработчик для события playersReady, запускаемого из компонента Menu.svelte
@@ -66,11 +68,11 @@ function handlePlayAgain(event:CustomEvent){
         {#if !showRules} 
         <Header score={score}/>
             {#if step === 1}
-                <Menu on:playersReady={handlePlayersReady} username={username}/>  
+                <Menu on:playersReady={handlePlayersReady} on:handleUsernameInput={handleUsernameSaved}/>  
             {:else if step === 2}
-                <FirstStep on:setpage={handleSetPage} bind:selectedItem={selectedItem}  on:playersReady={handlePlayersReady}/> 
+                <FirstStep on:setpage={handleSetPage} bind:selectedItem={selectedItem} username={username} on:playersReady={handlePlayersReady}/> 
                 {:else if step === 3}
-                <SecondStep selectedItem={selectedItem} bind:computerItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
+                <SecondStep selectedItem={selectedItem}  bind:rivalSelectedItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
             {:else if step === 4}
                 <ThirdStep  bind:computerItem={computerItem} selectedItem={selectedItem} 
                 on:playagain={handlePlayAgain}
@@ -90,15 +92,15 @@ function handlePlayAgain(event:CustomEvent){
     <span class="background {showRules ? 'blurred' : 'not-blurred'}">
         <Header score={score}/>
         <div class="desktop-content ">
-     
+        
         {#if step === 1}
-            <Menu on:usernameSaved={handleUsernameSaved} on:playersReady={handlePlayersReady}/> <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
+            <Menu username={username} on:playersReady={handlePlayersReady}/> <!-- Показываем Menu.svelte и передаем обработчик сохранения имени -->
         {:else if step === 2}
-            <FirstStep bind:selectedItem={selectedItem} on:setpage={handleSetPage}/> <!-- Перемещаем FirstStep на второе место -->
+            <FirstStep bind:selectedItem={selectedItem} on:setpage={handleSetPage} username={username}/> <!-- Перемещаем FirstStep на второе место -->
         {:else if step === 3}
-            <SecondStep bind:selectedItem={selectedItem} bind:computerItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
+            <SecondStep selectedItem={selectedItem} bind:rivalSelectedItem={computerItem} on:setpage={handleSetPage} /> <!-- Перемещаем SecondStep на третье место -->
         {:else if step === 4}
-            <ThirdStep     on:playagain={handlePlayAgain} computerItem={computerItem} selectedItem={selectedItem} on:setpage={handleSetPage} on:updateScore={handleUpdateScore} /> <!-- Перемещаем ThirdStep на четвертое место -->
+            <ThirdStep  on:playagain={handlePlayAgain} computerItem={computerItem} selectedItem={selectedItem} on:setpage={handleSetPage} on:updateScore={handleUpdateScore} /> <!-- Перемещаем ThirdStep на четвертое место -->
         {/if}
         <Footer on:openRules={handleRulesOpen}/>
     </div>
@@ -116,7 +118,7 @@ function handlePlayAgain(event:CustomEvent){
 .app {
     padding: 2rem;
     background: radial-gradient(134.00% 134.00% at 50% 0%, rgb(31, 55, 87), rgb(19, 21, 55) 100%);
-    height: 100%;
+    height: 100vh;
  }
 
  .desktop-content {

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
-    export let selectedItem: string;
+    export let selectedItem: string | null;
     export let computerItem: string | null;
 
     const dispatch = createEventDispatcher();
@@ -8,8 +8,10 @@
     let gameResult: string | null = null;
     function playAgain(){
         gameResult = null; 
+        selectedItem=null;
+        computerItem=null;
         dispatch("setpage", { page: 2 });
-        dispatch("playagain",{computerItem:null})
+        dispatch("playagain",{selectedItem:null,rivalSelectedItem:null,computerItem:null})
     }
     onMount(() => {
         gameResult = null;

@@ -2,12 +2,18 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 export let selectedItem;
-  function selectMove(selectedItem: string) {
+import io from 'socket.io-client';
+  export let username:string;
+  let socket = io(`http://localhost:3030`);
+
+
+function selectMove(selectedItem: string) {
     // Dispatch the move to the parent component
-    dispatch("setpage", { page: 3,selectedItem ,computerItem: null});
+    dispatch("setpage", { page: 3, selectedItem, computerItem: null });
 
-  }
-
+    // Send the selected item to the server via WebSocket
+    socket.emit('picked', { player: username, picked: selectedItem })
+}
  
 </script>
 <div class="game-content">

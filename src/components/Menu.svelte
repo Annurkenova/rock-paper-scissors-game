@@ -1,6 +1,11 @@
 <script lang="ts">
    import { createEventDispatcher } from 'svelte';
-  
+
+    import io, { Socket } from 'socket.io-client';
+
+ 
+    let socket: Socket = io('http://localhost:3030');
+
    export let username = ""; // Переменная для хранения имени пользователя
    let playersCount = 0; // Переменная для хранения количества игроков
    const dispatch = createEventDispatcher();
@@ -9,12 +14,12 @@
    function handleUsernameInput(event: Event) {
        const inputEvent = event as InputEvent;
        username = (inputEvent.target as HTMLInputElement).value;
-       dispatch("username")
+       dispatch("username",{username})
    }
   
-   // Функция для сохранения имени пользователя
    function saveUsername() {
-       // Проверяем, было ли уже сохранено имя
+    
+    socket.emit('picked', { player: username})
        if (!username.trim()) {
            alert("Please enter your name!");
            return;
@@ -34,6 +39,7 @@
     //    if (playersCount === 2) {
            // Отправляем событие playersReady только если количество игроков равно 2
            dispatch('playersReady');
+           
        
    }
 
@@ -46,17 +52,17 @@
 
 <section class="menu">
    <label class="menu-container">
-       <!-- Используем input для ввода имени пользователя -->
+       <!-- Используем input для ввода имени пользователя
        <input type="text" placeholder="Enter your name" value={username} on:input={handleUsernameInput} class="username-input">
-       <!-- Кнопка для сохранения имени пользователя -->
-       <button on:click={saveUsername}>Save</button>
+      Кнопка для сохранения имени пользователя -->
+       <!-- <button on:click={saveUsername}>Save</button> --> 
        <!-- Остальной код меню -->
        <div class="playOnline">
            <!-- Заменим просто текст кнопки на кнопку -->
            <img src="./public/images/icon-online.png" alt="Online"/>
            <button on:click={handlePlayersReady} class="play-online-button">PLAY ONLINE</button>
            <!-- Отображаем количество ожидающих игроков -->
-           <span class="waiting-number">{playersCount} waiting </span>
+           <!-- <span class="waiting-number">{playersCount} waiting </span> -->
        </div>
        <div class="withComputer">
            <img src="./public/images/icon-comp.png" alt="Computer">
@@ -78,8 +84,9 @@
  }
  .menu{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    margin-top: 2rem;
  }
 
  .playOnline {
