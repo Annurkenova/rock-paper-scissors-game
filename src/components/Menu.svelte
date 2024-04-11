@@ -14,14 +14,14 @@
   
    // Функция для сохранения имени пользователя
    function saveUsername() {
-       // Проверяем, было ли уже сохранено имя
-       if (!username.trim()) {
-           alert("Please enter your name!");
-           return;
-       }
-
-       // В этой функции не будем увеличивать счетчик игроков, чтобы он не изменялся при вводе имени
-   }
+    if (!username.trim()) {
+        alert("Пожалуйста, введите ваше имя!");
+        return;
+    }
+    dispatch('savedUsername', { username });
+    dispatch('updateUsername', { username: username });
+    console.log(username) // Отправляем событие с новым значением username
+}
 
    // Функция для обработки нажатия на кнопку PLAY ONLINE
    function handlePlayersReady() {
@@ -56,7 +56,7 @@
            <img src="./public/images/icon-online.png" alt="Online"/>
            <button on:click={handlePlayersReady} class="play-online-button">PLAY ONLINE</button>
            <!-- Отображаем количество ожидающих игроков -->
-           <span class="waiting-number">{playersCount} waiting </span>
+           <!--<span class="waiting-number">{playersCount} waiting </span>-->
        </div>
        <div class="withComputer">
            <img src="./public/images/icon-comp.png" alt="Computer">
@@ -68,14 +68,36 @@
 
 <style>
 
+@media (min-width: 768px) {
+
 .username-input {
-    width: 10vw;
-    margin-bottom: 20px;
-    }
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ccc; 
+    border-radius: 5px; 
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    margin-top: 20px;
+}
 
- button{
 
- }
+button {
+    padding: 10px 20px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    color: #fff; 
+    background-color: #007bff;
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
  .menu{
     display: flex;
     justify-content: space-between;
@@ -85,7 +107,8 @@
  .playOnline {
    display: flex;
    margin-bottom: 20px;
-   align-items: center; /* Чтобы изображение и текст были выровнены вертикально */
+   align-items: center;
+   margin-top: 20px;
  }
 
  .play-online-button, .play-computer-button {
@@ -102,22 +125,7 @@
 }
 
 .play-online-button:hover, .play-computer-button:hover {
-   color: #0056b3;
-}
-
-.menu-text {
-   font-family: Barlow Semi Condensed;
-   font-size: 16px;
-   font-weight: 600;
-   color: white;
-   margin-right: 20px;
-}
-
-.waiting-number {
-   font-family: Barlow Semi Condensed;
-   font-size: 16px;
-   font-weight: 600;
-   color: white;
+   border-color: #0056b3;
 }
 
 .playOnline img{
@@ -125,15 +133,87 @@
     width: 10vw;
     }
 
- .withComputer {
-   display: flex;
-
- }
+    .withComputer {
+        display: flex;
+   margin-bottom: 20px;
+   align-items: center;
+   margin-top: 20px;
+    }
 
  .withComputer img {
    margin-right: 20px;
    width: 10vw;
    height: 10vw;
  }
+}
+
+@media (max-width: 460px) {
+    .username-input {
+    width: 100%; 
+    padding: 10px; 
+    border: 2px solid #ccc; 
+    border-radius: 5px; 
+    font-size: 16px; 
+    transition: border-color 0.3s ease;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.menu{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+ }
+
+ .playOnline {
+   display: flex;
+   margin-bottom: 20px;
+   align-items: center;
+   margin-top: 20px;
+ }
+
+ .withComputer {
+   display: flex;
+   margin-bottom: 20px;
+   align-items: center;
+   margin-top: 20px;
+    }
+
+ .play-online-button, .play-computer-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    background-color: transparent;
+    transition:all 0.15s;
+}
+
+.playOnline img{
+   margin-right: 20px;
+   width: 10vw;
+    }
+
+ .withComputer img {
+   margin-right: 20px;
+   width: 10vw;
+   height: 10vw;
+ }
+}
 
 </style>
